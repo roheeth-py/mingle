@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "870834530379",
+    "firebase_url": "https://mingle-b7088-default-rtdb.firebaseio.com",
+    "project_id": "mingle-b7088",
+    "storage_bucket": "mingle-b7088.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:870834530379:android:dfb771dff690f49d4345ce",
+        "android_client_info": {
+          "package_name": "com.example.mingle"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAeoFubABMJIT0oYIP5DVe4C6DPfqUD0f0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
