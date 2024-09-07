@@ -1,18 +1,57 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class OtpScreen extends StatelessWidget {
-  const OtpScreen({super.key});
+class OtpScreen extends StatefulWidget {
+  const OtpScreen({
+    required this.phone,
+    super.key,
+  });
+  final String phone;
+
+  @override
+  State<OtpScreen> createState() => _OtpScreenState();
+}
+
+class _OtpScreenState extends State<OtpScreen> {
+  final oneOtp = TextEditingController();
+  final twoOtp = TextEditingController();
+  final threeOtp = TextEditingController();
+  final fourOtp = TextEditingController();
+  UserCredential? result;
 
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    final oneOtp = TextEditingController();
-    final twoOtp = TextEditingController();
-    final threeOtp = TextEditingController();
-    final fourOtp = TextEditingController();
+
+    void authentication(BuildContext context) async {
+      final firebase = FirebaseAuth.instance;
+      await firebase.verifyPhoneNumber(
+        phoneNumber: widget.phone,
+        verificationCompleted: (PhoneAuthCredential credential) {},
+        verificationFailed: (FirebaseAuthException e) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                e.message!,
+              ),
+            ),
+          );
+          return ;
+        },
+        codeSent: (String verificationId, int? resendToken) async {
+          var otp = "${oneOtp.text}${twoOtp.text}${threeOtp.text}${fourOtp.text}56";
+          final credential = PhoneAuthProvider.credential(
+              verificationId: verificationId, smsCode: otp);
+          result = await firebase.signInWithCredential(credential);
+          if(result!=null) Navigator.of(context).pop(result);
+        },
+        codeAutoRetrievalTimeout: (String verificationId) {},
+      );
+    }
 
     return Scaffold(
       resizeToAvoidBottomInset: false,
@@ -56,6 +95,24 @@ class OtpScreen extends StatelessWidget {
             ),
           ),
           Positioned(
+            top: screenHeight*.05,
+            left: screenWidth*0.05,
+            child: Container(
+              decoration: const ShapeDecoration(
+                  color: Colors.white,
+                  shape: CircleBorder(
+              )),
+              height: 48,
+              width: 48,
+              child: IconButton(
+                onPressed: () {
+                  Navigator.pop(context);
+                },
+                icon: const Icon(Icons.keyboard_backspace),
+              ),
+            ),
+          ),
+          Positioned(
             bottom: 0,
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 15),
@@ -87,82 +144,86 @@ class OtpScreen extends StatelessWidget {
                       children: [
                         SizedBox(
                           width: 50,
-                          child: Expanded(
-                            child: TextFormField(
-                              controller: oneOtp,
-                              textAlign: TextAlign.center,
-                              textInputAction: TextInputAction.next,
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
+                          child: TextFormField(
+                            controller: oneOtp,
+                            textAlign: TextAlign.center,
+                            textInputAction: TextInputAction.next,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                  borderRadius: BorderRadius.circular(15)),
+                            ),
+                            inputFormatters: [
+                              LengthLimitingTextInputFormatter(1),
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          width: 50,
+                          child: TextFormField(
+                            controller: twoOtp,
+                            textAlign: TextAlign.center,
+                            textInputAction: TextInputAction.next,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
                                 border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(15)),
-                              ),
-                              inputFormatters: [
-                                LengthLimitingTextInputFormatter(1),
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
-                            ),
+                                    borderRadius: BorderRadius.circular(15))),
+                            inputFormatters: [
+                              LengthLimitingTextInputFormatter(1),
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
                           ),
                         ),
                         SizedBox(
                           width: 50,
-                          child: Expanded(
-                            child: TextFormField(
-                              controller: twoOtp,
-                              textAlign: TextAlign.center,
-                              textInputAction: TextInputAction.next,
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                  border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(15))),
-                              inputFormatters: [
-                                LengthLimitingTextInputFormatter(1),
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          width: 50,
-                          child: Expanded(
-                            child: TextFormField(
-                              controller: threeOtp,
-                              textAlign: TextAlign.center,
-                              textInputAction: TextInputAction.next,
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
-                                  border: OutlineInputBorder(
-                                      borderRadius: BorderRadius.circular(15))),
-                              inputFormatters: [
-                                LengthLimitingTextInputFormatter(1),
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          width: 50,
-                          child: Expanded(
-                            child: TextFormField(
-                              controller: fourOtp,
-                              textAlign: TextAlign.center,
-                              textInputAction: TextInputAction.done,
-                              keyboardType: TextInputType.number,
-                              decoration: InputDecoration(
+                          child: TextFormField(
+                            controller: threeOtp,
+                            textAlign: TextAlign.center,
+                            textInputAction: TextInputAction.next,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
                                 border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(15),
-                                ),
+                                    borderRadius: BorderRadius.circular(15))),
+                            inputFormatters: [
+                              LengthLimitingTextInputFormatter(1),
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
+                          ),
+                        ),
+                        SizedBox(
+                          width: 50,
+                          child: TextFormField(
+                            controller: fourOtp,
+                            textAlign: TextAlign.center,
+                            textInputAction: TextInputAction.done,
+                            keyboardType: TextInputType.number,
+                            decoration: InputDecoration(
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(15),
                               ),
-                              inputFormatters: [
-                                LengthLimitingTextInputFormatter(1),
-                                FilteringTextInputFormatter.digitsOnly,
-                              ],
                             ),
+                            inputFormatters: [
+                              LengthLimitingTextInputFormatter(1),
+                              FilteringTextInputFormatter.digitsOnly,
+                            ],
                           ),
                         ),
                       ],
                     ),
-                  )
+                  ),
+                  const SizedBox(
+                    height: 30,
+                  ),
+                  ElevatedButton(
+                    onPressed: () {
+                      authentication(context);
+                    },
+                    style: ElevatedButton.styleFrom(
+                      minimumSize: Size(screenWidth * 0.75, 50),
+                    ),
+                    child: const Text("Validate"),
+                  ),
                 ],
               ),
             ),

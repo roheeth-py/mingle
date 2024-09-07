@@ -1,5 +1,6 @@
-import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:flutter/material.dart';
 import 'package:message/screens/auth_screens/otp_screen.dart';
 
 class Login extends StatefulWidget {
@@ -25,39 +26,19 @@ class _LoginState extends State<Login> {
     }
 
     key.currentState!.save();
-    Navigator.of(context).push(
+    UserCredential result = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (ctx) {
-          return const OtpScreen();
+          return OtpScreen(phone: "+91${phoneNumberController.text}",);
         },
       ),
     );
+    FirebaseFirestore.instance.collection("users").doc(result.user!.uid).set({
+      "user_id": result.user!.uid,
+      "time": Timestamp.now(),
+    });
   }
 
-  void authentication(String phoneNumber, BuildContext context) async {
-    final firebase = FirebaseAuth.instance;
-    print(phoneNumber);
-    await firebase.verifyPhoneNumber(
-      phoneNumber: phoneNumber,
-      verificationCompleted: (PhoneAuthCredential credential) async {},
-      verificationFailed: (FirebaseAuthException e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(
-              e.message!,
-            ),
-          ),
-        );
-        print("2");
-      },
-      codeSent: (String verificationId, int? resendToken) async {
-        final cred = PhoneAuthProvider.credential(
-            verificationId: verificationId, smsCode: "");
-        await firebase.signInWithCredential(cred);
-      },
-      codeAutoRetrievalTimeout: (String verificationId) {},
-    );
-  }
 
   @override
   Widget build(BuildContext context) {
