@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 
 class OtpScreen extends StatefulWidget {
   const OtpScreen({
@@ -19,13 +18,13 @@ class _OtpScreenState extends State<OtpScreen> {
   final twoOtp = TextEditingController();
   final threeOtp = TextEditingController();
   final fourOtp = TextEditingController();
+  bool isLoading = false;
   UserCredential? result;
 
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
-
 
     void authentication(BuildContext context) async {
       final firebase = FirebaseAuth.instance;
@@ -40,14 +39,16 @@ class _OtpScreenState extends State<OtpScreen> {
               ),
             ),
           );
-          return ;
+          return;
         },
         codeSent: (String verificationId, int? resendToken) async {
-          var otp = "${oneOtp.text}${twoOtp.text}${threeOtp.text}${fourOtp.text}56";
+          var otp = "123456";
+          print(otp);
+          // var otp = "${oneOtp.text}${twoOtp.text}${threeOtp.text}${fourOtp.text}56";
           final credential = PhoneAuthProvider.credential(
               verificationId: verificationId, smsCode: otp);
           result = await firebase.signInWithCredential(credential);
-          if(result!=null) Navigator.of(context).pop(result);
+          Navigator.of(context).pop(result);
         },
         codeAutoRetrievalTimeout: (String verificationId) {},
       );
@@ -95,13 +96,11 @@ class _OtpScreenState extends State<OtpScreen> {
             ),
           ),
           Positioned(
-            top: screenHeight*.05,
-            left: screenWidth*0.05,
+            top: screenHeight * .05,
+            left: screenWidth * 0.05,
             child: Container(
               decoration: const ShapeDecoration(
-                  color: Colors.white,
-                  shape: CircleBorder(
-              )),
+                  color: Colors.white, shape: CircleBorder()),
               height: 48,
               width: 48,
               child: IconButton(
@@ -183,8 +182,10 @@ class _OtpScreenState extends State<OtpScreen> {
                             textInputAction: TextInputAction.next,
                             keyboardType: TextInputType.number,
                             decoration: InputDecoration(
-                                border: OutlineInputBorder(
-                                    borderRadius: BorderRadius.circular(15))),
+                              border: OutlineInputBorder(
+                                borderRadius: BorderRadius.circular(15),
+                              ),
+                            ),
                             inputFormatters: [
                               LengthLimitingTextInputFormatter(1),
                               FilteringTextInputFormatter.digitsOnly,

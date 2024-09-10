@@ -93,19 +93,20 @@ class _RegistrationPageState extends State<RegistrationPage> {
                       decoration: const ShapeDecoration(shape: CircleBorder()),
                       child: (userImage == null)
                           ? Image.network(
-                          "https://gts-ts.com/wp-content/uploads/2018/11/placeholder-person.png")
+                              "https://gts-ts.com/wp-content/uploads/2018/11/placeholder-person.png")
                           : Image.file(
-                        userImage!,
-                        fit: BoxFit.cover,
-                      ),
+                              userImage!,
+                              fit: BoxFit.cover,
+                            ),
                     ),
                   ),
                   const SizedBox(
                     height: 25,
                   ),
                   Form(
-                    key: _formKey, // Use the form key here
+                    key: _formKey,
                     child: TextFormField(
+                      textCapitalization: TextCapitalization.words,
                       controller: userName,
                       style: TextStyle(
                         fontWeight: FontWeight.bold,
@@ -139,31 +140,28 @@ class _RegistrationPageState extends State<RegistrationPage> {
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           if (_formKey.currentState!.validate()) {
+            _formKey.currentState!.save();
             if (userImage == null) {
               ScaffoldMessenger.of(context).showSnackBar(
                   const SnackBar(content: Text("Please select an image")));
               return;
             }
 
-            final currentUser = FirebaseAuth.instance.currentUser!;
+            final currentUser = FirebaseAuth.instance.currentUser!.uid;
             final storageRef = FirebaseStorage.instance
                 .ref("user_image")
-                .child("${currentUser.uid}.jpg");
+                .child("$currentUser.jpg");
 
-            // Upload the image
             await storageRef.putFile(userImage!);
             final imageUrl = await storageRef.getDownloadURL();
 
-            // Update Firestore with user data
             await FirebaseFirestore.instance
                 .collection("users")
-                .doc(currentUser.uid)
-                .update({
+                .doc(currentUser)
+                .set({
               "user_name": userName.text,
               "image_url": imageUrl,
-            });
-
-            print(currentUser.uid);
+            }, SetOptions(merge: true));
           }
         },
         icon: const Icon(Icons.check_circle_outlined),

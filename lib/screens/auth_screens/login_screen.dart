@@ -1,5 +1,4 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:message/screens/auth_screens/otp_screen.dart';
 
@@ -26,19 +25,32 @@ class _LoginState extends State<Login> {
     }
 
     key.currentState!.save();
-    UserCredential result = await Navigator.of(context).push(
+    final result = await Navigator.of(context).push(
       MaterialPageRoute(
         builder: (ctx) {
-          return OtpScreen(phone: "+91${phoneNumberController.text}",);
+          return OtpScreen(
+            phone: "+91${phoneNumberController.text}",
+          );
         },
       ),
     );
-    FirebaseFirestore.instance.collection("users").doc(result.user!.uid).set({
-      "user_id": result.user!.uid,
-      "time": Timestamp.now(),
-    });
-  }
+    if (result == null) {}
+    CollectionReference users = FirebaseFirestore.instance.collection('users');
+    final user = result.user!;
 
+    DocumentSnapshot doc = await users.doc(user.uid).get();
+
+    if (!doc.exists) {
+      await users.doc(user.uid).set({
+        "user_id": result.user!.uid,
+        "time": Timestamp.now(),
+      });
+    } else {
+      await users.doc(user.uid).update({
+        "time": Timestamp.now(),
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -141,7 +153,7 @@ class _LoginState extends State<Login> {
                         ),
                       ),
                       validator: (state) {
-                        if (phoneNumberController.text.length<10) {
+                        if (phoneNumberController.text.length < 10) {
                           return "Enter a valid phone number";
                         }
                         return null;
@@ -163,21 +175,6 @@ class _LoginState extends State<Login> {
                     ),
                     child: const Text("Get OTP"),
                   ),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Text("New User?"),
-                      TextButton(
-                        onPressed: () {},
-                        child: const Text(
-                          "Sign Up",
-                          style: TextStyle(
-                            color: Colors.blueAccent,
-                          ),
-                        ),
-                      ),
-                    ],
-                  )
                 ],
               ),
             ),
