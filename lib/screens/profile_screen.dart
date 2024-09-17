@@ -44,7 +44,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               child: GestureDetector(
                 onTap: () async {
-                  final img = await ImagePicker().pickImage(source: ImageSource.camera);
+                  final img = await ImagePicker().pickImage(source: ImageSource.gallery, maxWidth: 100, maxHeight: 100, imageQuality: 70);
                   if(img==null) return ;
                   final imgPath = File(img.path);
                   final storageRef = FirebaseStorage.instance.ref("user_image").child("${FirebaseAuth.instance.currentUser!.uid}.jpg");
