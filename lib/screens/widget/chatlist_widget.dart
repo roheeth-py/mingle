@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:message/screens/chat_screen.dart';
 
 import '../profile_screen.dart';
-
 
 class ChatListWidget extends StatelessWidget {
   const ChatListWidget({super.key});
@@ -51,12 +51,23 @@ class ChatListWidget extends StatelessWidget {
           }
 
           if (snapshot.hasData) {
-            final data = snapshot.data!.docs;
-            return ListView.builder(
+            final docs = snapshot.data!.docs;
+            final data = docs
+                .where((e) =>
+                    FirebaseAuth.instance.currentUser!.uid !=
+                    e.data()["user_id"])
+                .toList();
+            return ListView.separated(
               itemCount: data.length,
               itemBuilder: (ctx, item) {
                 return ListTile(
-                  onTap: () {},
+                  onTap: () {
+                    Navigator.of(context).push(
+                      MaterialPageRoute(
+                        builder: (ctx) => ChatScreen(data[item].data()),
+                      ),
+                    );
+                  },
                   leading: Container(
                     height: 55,
                     width: 55,
@@ -68,11 +79,19 @@ class ChatListWidget extends StatelessWidget {
                     ),
                     child: Image.network(
                       data[item].data()["image_url"],
-                      fit: BoxFit.fill,
+                      width: 55,
+                      height: 55,
+                      fit: BoxFit.cover,
                     ),
                   ),
                   title: Text(data[item].data()["user_name"]),
                   subtitle: const Text("New Message"),
+                );
+              },
+              separatorBuilder: (BuildContext context, int index) {
+                return const Divider(
+                  indent: 20,
+                  endIndent: 20,
                 );
               },
             );

@@ -17,7 +17,7 @@ class _ProfilePageState extends State<ProfilePage> {
   Future<DocumentSnapshot<Map<String, dynamic>>> getData() async {
     final uid = FirebaseAuth.instance.currentUser!.uid;
     final doc =
-    await FirebaseFirestore.instance.collection("users").doc(uid).get();
+        await FirebaseFirestore.instance.collection("users").doc(uid).get();
     return doc;
   }
 
@@ -44,19 +44,30 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               child: GestureDetector(
                 onTap: () async {
-                  final img = await ImagePicker().pickImage(source: ImageSource.gallery, maxWidth: 100, maxHeight: 100, imageQuality: 70);
-                  if(img==null) return ;
+                  final img = await ImagePicker().pickImage(
+                    source: ImageSource.gallery,
+                    imageQuality: 100,
+                  );
+                  if (img == null) return;
                   final imgPath = File(img.path);
-                  final storageRef = FirebaseStorage.instance.ref("user_image").child("${FirebaseAuth.instance.currentUser!.uid}.jpg");
+                  final storageRef = FirebaseStorage.instance
+                      .ref("user_image")
+                      .child("${FirebaseAuth.instance.currentUser!.uid}.jpg");
                   await storageRef.putFile(imgPath);
                   final url = await storageRef.getDownloadURL();
 
-                  FirebaseFirestore.instance.collection("users").doc(FirebaseAuth.instance.currentUser!.uid).update({
+                  FirebaseFirestore.instance
+                      .collection("users")
+                      .doc(FirebaseAuth.instance.currentUser!.uid)
+                      .update({
                     "image_url": url,
                   });
                 },
                 child: StreamBuilder(
-                    stream: FirebaseFirestore.instance.collection("users").doc(FirebaseAuth.instance.currentUser!.uid).snapshots(),
+                    stream: FirebaseFirestore.instance
+                        .collection("users")
+                        .doc(FirebaseAuth.instance.currentUser!.uid)
+                        .snapshots(),
                     builder: (ctx, snapshot) {
                       if (snapshot.hasData) {
                         return Image.network(
@@ -99,7 +110,7 @@ class _ProfilePageState extends State<ProfilePage> {
               onChanged: (value) {},
               title: Text("Dark Mode"),
               subtitle:
-              Text("We are working to release it in future versions."),
+                  Text("We are working to release it in future versions."),
             ),
             Spacer(),
             Text("© Roheeth Dhanasekaran"),

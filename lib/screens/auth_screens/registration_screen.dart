@@ -114,6 +114,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                       ),
                       keyboardType: TextInputType.name,
                       decoration: InputDecoration(
+
                         prefixIcon: const Icon(Icons.person),
                         hintText: "User Name",
                         fillColor: Colors.grey.shade200,

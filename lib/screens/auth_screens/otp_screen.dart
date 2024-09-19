@@ -42,9 +42,7 @@ class _OtpScreenState extends State<OtpScreen> {
           return;
         },
         codeSent: (String verificationId, int? resendToken) async {
-          var otp = "123456";
-          print(otp);
-          // var otp = "${oneOtp.text}${twoOtp.text}${threeOtp.text}${fourOtp.text}56";
+          var otp = "${oneOtp.text}${twoOtp.text}${threeOtp.text}${fourOtp.text}56";
           final credential = PhoneAuthProvider.credential(
               verificationId: verificationId, smsCode: otp);
           result = await firebase.signInWithCredential(credential);
