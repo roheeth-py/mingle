@@ -50,58 +50,58 @@ class ChatListWidget extends StatelessWidget {
             );
           }
 
-          if (snapshot.hasData) {
-            final docs = snapshot.data!.docs;
-            final data = docs
-                .where((e) =>
-                    FirebaseAuth.instance.currentUser!.uid !=
-                    e.data()["user_id"])
-                .toList();
-            return ListView.separated(
-              itemCount: data.length,
-              itemBuilder: (ctx, item) {
-                return ListTile(
-                  onTap: () {
-                    Navigator.of(context).push(
-                      MaterialPageRoute(
-                        builder: (ctx) => ChatScreen(data[item].data()),
-                      ),
-                    );
-                  },
-                  leading: Container(
-                    height: 55,
-                    width: 55,
-                    clipBehavior: Clip.hardEdge,
-                    decoration: ShapeDecoration(
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(50),
-                      ),
-                    ),
-                    child: Image.network(
-                      data[item].data()["image_url"],
-                      width: 55,
-                      height: 55,
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                  title: Text(data[item].data()["user_name"]),
-                  subtitle: const Text("New Message"),
-                );
-              },
-              separatorBuilder: (BuildContext context, int index) {
-                return const Divider(
-                  indent: 20,
-                  endIndent: 20,
-                );
-              },
+          if (!snapshot.hasData || snapshot.data!.docs.length<=1) {
+            return const Center(
+              child: Text(
+                "Ready to make your chats more fun?\ninvite your crew now!",
+                textAlign: TextAlign.center,
+              ),
             );
           }
 
-          return const Center(
-            child: Text(
-              "Ready to make your chats more fun?\ninvite your crew now!",
-              textAlign: TextAlign.center,
-            ),
+          final docs = snapshot.data!.docs;
+          final data = docs
+              .where((e) =>
+          FirebaseAuth.instance.currentUser!.uid != e.data()["user_id"])
+              .toList();
+
+          return ListView.separated(
+            itemCount: data.length,
+            itemBuilder: (ctx, item) {
+              return ListTile(
+                onTap: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (ctx) => ChatScreen(data[item].data()),
+                    ),
+                  );
+                },
+                leading: Container(
+                  height: 55,
+                  width: 55,
+                  clipBehavior: Clip.hardEdge,
+                  decoration: ShapeDecoration(
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(50),
+                    ),
+                  ),
+                  child: Image.network(
+                    data[item].data()["image_url"],
+                    width: 55,
+                    height: 55,
+                    fit: BoxFit.cover,
+                  ),
+                ),
+                title: Text(data[item].data()["user_name"]),
+                subtitle: const Text("New Message"),
+              );
+            },
+            separatorBuilder: (BuildContext context, int index) {
+              return const Divider(
+                indent: 20,
+                endIndent: 20,
+              );
+            },
           );
         },
       ),

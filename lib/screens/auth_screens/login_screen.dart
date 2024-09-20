@@ -13,6 +13,12 @@ class _LoginState extends State<Login> {
   final phoneNumberController = TextEditingController();
   final key = GlobalKey<FormState>();
 
+  @override
+  void dispose() {
+    phoneNumberController.dispose();
+    super.dispose();
+  }
+
   void getOtpFunc() async {
     if (!key.currentState!.validate()) {
       Future.delayed(

@@ -19,6 +19,12 @@ class _RegistrationPageState extends State<RegistrationPage> {
   File? userImage;
 
   @override
+  void dispose() {
+    userName.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
@@ -80,7 +86,7 @@ class _RegistrationPageState extends State<RegistrationPage> {
                   InkWell(
                     onTap: () async {
                       final img = await ImagePicker().pickImage(
-                          source: ImageSource.camera, imageQuality: 50);
+                          source: ImageSource.gallery, imageQuality: 100);
                       if (img == null) return;
                       setState(() {
                         userImage = File(img.path);

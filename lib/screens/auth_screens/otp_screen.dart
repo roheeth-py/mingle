@@ -22,6 +22,16 @@ class _OtpScreenState extends State<OtpScreen> {
   UserCredential? result;
 
   @override
+  void dispose() {
+    oneOtp.dispose();
+    twoOtp.dispose();
+    threeOtp.dispose();
+    fourOtp.dispose();
+    super.dispose();
+  }
+
+
+  @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;

@@ -19,7 +19,7 @@ class ChatListScreen extends StatelessWidget {
       builder: (ctx, snapshot) {
         // Check if snapshot has data and ensure the data map exists
 
-        if (!snapshot.hasData || snapshot.data!.data() == null) {
+        if (!snapshot.hasData && snapshot.data!.data() == null) {
           return const Scaffold(
               body: Center(child: CircularProgressIndicator()));
         }

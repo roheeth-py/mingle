@@ -1,6 +1,5 @@
 import "package:cloud_firestore/cloud_firestore.dart";
 import "package:firebase_auth/firebase_auth.dart";
-import "package:flutter/foundation.dart";
 import "package:flutter/material.dart";
 
 class ChatScreen extends StatefulWidget {
@@ -15,19 +14,26 @@ class ChatScreen extends StatefulWidget {
 class _ChatScreenState extends State<ChatScreen> {
   final controller = TextEditingController();
 
+  @override
+  void dispose() {
+    controller.dispose();
+    super.dispose();
+  }
+
   Future<void> method() async {
-    List ids = [FirebaseAuth.instance.currentUser!.uid.toString(), widget.data["user_id"].toString()];
+    List ids = [
+      FirebaseAuth.instance.currentUser!.uid.toString(),
+      widget.data["user_id"].toString()
+    ];
     ids.sort();
     String chatId = ids.join();
 
-    final doc = await FirebaseFirestore.instance
-        .collection("chats")
-        .doc(chatId).get();
+    final doc =
+        await FirebaseFirestore.instance.collection("chats").doc(chatId).get();
     if (doc.exists) return;
     await FirebaseFirestore.instance
         .collection("chats")
-        .doc(widget.data["user_id"].toString() +
-            FirebaseAuth.instance.currentUser!.uid.toString())
+        .doc(chatId)
         .set({
       "id": chatId,
       "messages": [],
@@ -46,19 +52,24 @@ class _ChatScreenState extends State<ChatScreen> {
 
   @override
   Widget build(BuildContext context) {
-    List ids = [FirebaseAuth.instance.currentUser!.uid.toString(), widget.data["user_id"].toString()];
+    List ids = [
+      FirebaseAuth.instance.currentUser!.uid.toString(),
+      widget.data["user_id"].toString()
+    ];
     ids.sort();
     String chatId = ids.join();
     return Scaffold(
       appBar: AppBar(
+        forceMaterialTransparency: true,
         actions: [
           Container(
             height: 40,
             width: 40,
             clipBehavior: Clip.hardEdge,
             decoration: const ShapeDecoration(shape: CircleBorder()),
-            child: Image.network(widget.data["image_url"]),
+            child: Image.network(widget.data["image_url"], fit: BoxFit.fill,),
           ),
+          const SizedBox(width: 15,),
         ],
         titleSpacing: 8,
         title: Text(
@@ -71,36 +82,63 @@ class _ChatScreenState extends State<ChatScreen> {
               .doc(chatId)
               .snapshots(),
           builder: (ctx, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting)
-              return Center(child: CircularProgressIndicator());
+            if (snapshot.connectionState == ConnectionState.waiting || !snapshot.hasData) {
+              return const Center(child: CircularProgressIndicator());
+            }
 
             if (snapshot.hasError) {
-              Center(child: Text("Error Occured, Try after some time"));
+              const Center(child: Text("Error Occured, Try after some time"));
             }
 
             List f = snapshot.data!.data()!["messages"];
-            if (f.isEmpty && snapshot.hasData)
-              return Center(child: Text("Spark the Conversation Now!"));
+            if (f.isEmpty && snapshot.hasData) {
+              return const Center(child: Text("Spark the Conversation Now!"));
+            }
 
-            return ListView.builder(itemCount: f.length, itemBuilder: (ctx, item){
-              return Row(
-                children: [
-                  Container(
-                    child: Text(f[item].toString()),
-                  )
-                ],
-              );
-            });
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 65, top: 10),
+              child: ListView.builder(
+                  itemCount: f.length,
+                  itemBuilder: (ctx, item) {
+                    return Row(
+                      mainAxisAlignment:
+                          (FirebaseAuth.instance.currentUser!.uid !=
+                                  f[item]["sender_id"])
+                              ? MainAxisAlignment.start
+                              : MainAxisAlignment.end,
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 15),
+                          margin:
+                              const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+                          decoration: BoxDecoration(
+                              borderRadius: BorderRadius.circular(10),
+                              color: (FirebaseAuth.instance.currentUser!.uid !=
+                                  f[item]["sender_id"])
+                                  ? const Color(0xFF007AFF)
+                                  : Colors.grey[300]),
+                          constraints: const BoxConstraints(maxWidth: 300),
+                          child: Text(f[item]["text"].toString(), style: TextStyle(
+                            color:  (FirebaseAuth.instance.currentUser!.uid !=
+                                f[item]["sender_id"])
+                                ? Colors.white
+                                :Colors.black,
+                            fontSize: 16
+                          ),),
+                        ),
+                      ],
+                    );
+                  }),
+            );
           }),
       bottomSheet: Padding(
-        padding: const EdgeInsets.all(8.0),
+        padding: const EdgeInsets.only(left: 8, right: 8, bottom: 8),
         child: Stack(
           children: [
             TextField(
               controller: controller,
-              onTapOutside: (event) {
-                FocusScope.of(context).unfocus();
-              },
+              textCapitalization: TextCapitalization.sentences,
               decoration: InputDecoration(
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(50),
@@ -124,8 +162,7 @@ class _ChatScreenState extends State<ChatScreen> {
                   if (controller.text.isEmpty) return;
                   await FirebaseFirestore.instance
                       .collection("chats")
-                      .doc(widget.data["user_id"].toString() +
-                          FirebaseAuth.instance.currentUser!.uid.toString())
+                      .doc(chatId)
                       .update({
                     "messages": FieldValue.arrayUnion([
                       {
@@ -135,7 +172,7 @@ class _ChatScreenState extends State<ChatScreen> {
                       }
                     ]),
                   });
-                 controller.clear();
+                  controller.clear();
                 },
                 icon: const Icon(Icons.send_rounded),
               ),
@@ -145,10 +182,4 @@ class _ChatScreenState extends State<ChatScreen> {
       ),
     );
   }
-}
-
-class NewMessage {
-  NewMessage({required this.message});
-
-  final String message;
 }

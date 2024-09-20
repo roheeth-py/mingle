@@ -100,7 +100,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     style: const TextStyle(fontSize: 18),
                   );
                 }),
-            Divider(
+            const Divider(
               height: 60,
               indent: 20,
               endIndent: 20,
@@ -108,13 +108,19 @@ class _ProfilePageState extends State<ProfilePage> {
             SwitchListTile(
               value: false,
               onChanged: (value) {},
-              title: Text("Dark Mode"),
+              title: const Text("Dark Mode"),
               subtitle:
-                  Text("We are working to release it in future versions."),
+                  const Text("We are working to release it in future versions."),
             ),
-            Spacer(),
-            Text("© Roheeth Dhanasekaran"),
-            SizedBox(
+            const Spacer(),
+            const Text(
+              "© Roheeth Dhanasekaran",
+              style: TextStyle(
+                fontFamily: "ReenieBeanie",
+                fontSize: 24
+              ),
+            ),
+            const SizedBox(
               height: 30,
             ),
           ],
